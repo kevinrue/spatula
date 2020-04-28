@@ -1,6 +1,11 @@
 Package: spatula
 Title: Utilities for Working with Spatial Data
 Version: 0.98.0
+Date: 2020-04-27
+Description:
+    Provides Bioconductor-friendly bindings for classes from the sp package,
+    allowing them to be stored as metadata fields on standard Bioconductor objects 
+    like the SummarizedExperiment container.
 Depends: 
     sp,
     S4Vectors,
@@ -15,4 +20,5 @@ Suggests:
 Authors: c(person("Aaron", "Lun", role=c("aut", "cre"), email='infinite.monkeys.with.keyboards@gmail.com'),
     person("Kevin", "Rue-Albrecht", role=c("aut"), email='kevinrue67@gmail.com'))
 VignetteBuilder: knitr
+License: GPL-3
 RoxygenNote: 7.1.0
