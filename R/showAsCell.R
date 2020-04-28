@@ -18,6 +18,10 @@
 #' df <- DataFrame(location=I(X), other=LETTERS[1:10])
 #' df
 #'
+#' # Works for spatial polygons as well, based on the polygon centroid.
+#' spm <- makeSpatialPolygons(matrix(runif(10), ncol=2), matrix(runif(10), ncol=2))
+#' DataFrame(poly=I(spm))
+#'
 #' @author Aaron Lun
 #' @name showAsCell
 NULL
@@ -32,10 +36,10 @@ NULL
 
 #' @export
 #' @rdname showAsCell
-#' @importFrom sp SpatialPointsDataFrame
-setMethod("showAsCell", "SpatialPointsDataFrame", .coord_shower)
+#' @importFrom sp SpatialPoints
+setMethod("showAsCell", "SpatialPoints", .coord_shower)
 
 #' @export
 #' @rdname showAsCell
-#' @importFrom sp SpatialPoints
-setMethod("showAsCell", "SpatialPoints", .coord_shower)
+#' @importFrom sp SpatialPolygons
+setMethod("showAsCell", "SpatialPolygons", .coord_shower) # uses the lab_pts, probably the average.
