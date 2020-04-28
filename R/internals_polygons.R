@@ -14,6 +14,17 @@ setMethod("coordinates", ".PolygonsVector", function(obj) {
     coordinates(obj@polygons)
 })
 
+.uniquify_names <- function(poly.list) {
+    ids <- lapply(poly.list, slot, name="ID")
+    if (anyDuplicated(ids)) {
+        ids <- make.names(ids, unique=TRUE)
+        for (i in seq_along(poly.list)) {
+            poly.list[[i]]@ID <- ids[i]
+        }
+    }
+    poly.list
+}
+
 #' @importFrom sp polygons 
 #' @importFrom S4Vectors bindROWS
 setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
@@ -23,13 +34,7 @@ setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=T
     all.poly <- c(ref.poly, obj.poly)
 
     # Checking names.
-    ids <- lapply(all.poly, slot, name="ID")
-    if (anyDuplicated(ids)) {
-        ids <- make.names(ids, unique=TRUE)
-        for (i in seq_along(all.poly)) {
-            all.poly[[i]]@ID <- ids[i]
-        }
-    }
+    all.poly <- .uniquify_names(all.poly)
 
     # It must be said that the sp getter/setters leave much to be desired.
     initialize(x, polygons=SpatialPolygons(all.poly, proj4string=x@polygons@proj4string)) 

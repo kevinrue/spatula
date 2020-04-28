@@ -37,6 +37,7 @@
 #' c(spm, spm2)
 #'
 #' @name spatula-bind
+#' @aliases [,SpatialPolygons-method
 #'
 #' @export
 #' @importMethodsFrom S4Vectors c
@@ -53,4 +54,12 @@ setMethod("c", "SpatialPolygons", function(x, ..., ignore.mcols = FALSE, recursi
     stuff <- lapply(list(...), .PolygonsVector)
     out <- do.call(c, c(list(.PolygonsVector(x)), stuff, list(ignore.mcols=ignore.mcols, recursive=recursive)))
     out@polygons
+})
+
+#' @export
+setMethod("[", "SpatialPolygons", function(x, i, j, ..., drop = TRUE) {
+   # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
+   x@polygons <- .uniquify_names(x@polygons[i])
+   x@plotOrder <- integer(0)
+   x
 })
