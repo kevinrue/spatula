@@ -2,13 +2,13 @@
 % Please edit documentation in R/showAsCell.R
 \name{showAsCell}
 \alias{showAsCell}
-\alias{showAsCell,SpatialPointsDataFrame-method}
 \alias{showAsCell,SpatialPoints-method}
+\alias{showAsCell,SpatialPolygons-method}
 \title{Showing \pkg{sp} classes}
 \usage{
-\S4method{showAsCell}{SpatialPointsDataFrame}(object)
-
 \S4method{showAsCell}{SpatialPoints}(object)
+
+\S4method{showAsCell}{SpatialPolygons}(object)
 }
 \arguments{
 \item{object}{An instance of an \pkg{sp} class with vector-like characteristics,
@@ -29,6 +29,10 @@ showAsCell(X)
 
 df <- DataFrame(location=I(X), other=LETTERS[1:10])
 df
+
+# Works for spatial polygons as well, based on the polygon centroid.
+spm <- makeSpatialPolygons(matrix(runif(10), ncol=2), matrix(runif(10), ncol=2))
+DataFrame(poly=I(spm))
 
 }
 \author{
