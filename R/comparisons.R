@@ -120,13 +120,13 @@ setMethod("order", "SpatialPoints", function(..., na.last = TRUE, decreasing = F
 #' @export
 setMethod("sort", "SpatialPoints", function(x, decreasing = FALSE, ...) {
     out <- sort(.PointsVector(x), decreasing=decreasing, ...)
-    out@points
+    out@spatial
 })
 
 #' @export
 setMethod("unique", "SpatialPoints", function(x, incomparables=FALSE, ...) {
     out <- unique(.PointsVector(x), incomparables=incomparables, ...)
-    out@points
+    out@spatial
 })
 
 #' @export
@@ -166,13 +166,13 @@ setMethod("order", "SpatialPolygons", function(..., na.last = TRUE, decreasing =
 #' @export
 setMethod("sort", "SpatialPolygons", function(x, decreasing = FALSE, ...) {
     out <- sort(.PolygonsVector(x), decreasing=decreasing, ...)
-    out@polygons
+    out@spatial
 })
 
 #' @export
 setMethod("unique", "SpatialPolygons", function(x, incomparables=FALSE, ...) {
     out <- unique(.PolygonsVector(x), incomparables=incomparables, ...)
-    out@polygons
+    out@spatial
 })
 
 #' @export

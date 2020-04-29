@@ -44,7 +44,7 @@
 setMethod("c", "SpatialPoints", function(x, ..., ignore.mcols = FALSE, recursive = FALSE) {
     stuff <- lapply(list(...), .PointsVector)
     out <- do.call(c, c(list(.PointsVector(x)), stuff, list(ignore.mcols=ignore.mcols, recursive=recursive)))
-    out@points
+    out@spatial
 })
 
 #' @export
@@ -53,13 +53,13 @@ setMethod("c", "SpatialPoints", function(x, ..., ignore.mcols = FALSE, recursive
 setMethod("c", "SpatialPolygons", function(x, ..., ignore.mcols = FALSE, recursive = FALSE) {
     stuff <- lapply(list(...), .PolygonsVector)
     out <- do.call(c, c(list(.PolygonsVector(x)), stuff, list(ignore.mcols=ignore.mcols, recursive=recursive)))
-    out@polygons
+    out@spatial
 })
 
 #' @export
 setMethod("[", "SpatialPolygons", function(x, i, j, ..., drop = TRUE) {
    # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
-   x@polygons <- .uniquify_names(x@polygons[i])
+   x@polygons <- .uniquify_ids(x@polygons[i])
    x@plotOrder <- integer(0)
    x
 })
