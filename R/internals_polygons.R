@@ -21,6 +21,10 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
     vapply(pl, slot, name="ID", "")
 }
 
+.get_areas <- function(pl) {
+    vapply(pl, slot, name="area", 0)
+}
+
 .uniquify_ids <- function(pl) {
     ids <- .get_ids(pl)
     if (anyDuplicated(ids)) {
@@ -83,36 +87,43 @@ setMethod("sameAsPreviousROW", ".PolygonsVector", function(x) {
 
 #' @importFrom sp coordinates
 #' @importFrom S4Vectors order
-setMethod("order", ".PolygonsVector", function(..., na.last = TRUE, 
-    decreasing = FALSE, method = c("auto", "shell", "radix")) 
-{
-    everything <- lapply(list(...), .as_spatial)
-    coords.out <- lapply(everything, FUN=function(y) {
-        .mat2list(coordinates(y))
-    })
+setMethod("xtfrm", ".PolygonsVector", function(x) {
+    ref <- .as_spatial(x)
+    coords <- .mat2list(coordinates(ref))
+    all.polys <- .get_polygons(ref)
+    metrics <- c(coords, list(.get_areas(all.polys)))
 
-    coords.out2 <- unlist(coords.out, recursive=FALSE)
-    args <- list(na.last=na.last, decreasing=decreasing, method=match.arg(method))
-    o <- do.call(order, c(coords.out2, args))
+    o <- do.call(order, metrics)
+    output <- seq_along(o)
+    output[o] <- output
 
-    # Tie breaking. This could probably be done in a better way
-    # but I simply could not be bothered at this point. Very 
-    # unlikely that we'll get two polygons with the same centroid.
-    has.ties <- lapply(coords.out[[1]], function(x) sameAsPreviousROW(x[o]))
+    has.ties <- lapply(metrics, function(x) sameAsPreviousROW(x[o]))
     has.ties <- Reduce("&", has.ties)
 
     if (any(has.ties)) {
-        deparsed <- everything
-        for (i in seq_along(everything)) {
-            current <- .get_polygons(everything[[i]])
-            deparsed[[i]] <- vapply(current, FUN=function(x) {
+        # Iterating through the runs of ties to rearrange them. This could
+        # probably be done in a better way with some kind of base64 encoding,
+        # but I didn't want to introduce another dependency, so WHATEVER.
+        tie.start <- which(!has.ties)
+        tie.end <- c(tie.start[-1]-1L, length(has.ties))
+        keep <- tie.start!=tie.end
+
+        for (i in which(keep)) {
+            curi <- tie.start[i]:tie.end[i]
+            curo <- o[curi]
+            curp <- all.polys[curo]
+
+            # AW GROSS!
+            deparsed <- vapply(curp, FUN=function(x) {
                 x <- .wipe_id(x)
                 paste(deparse(x), collapse="")
             }, FUN.VALUE="")
-        }
 
-        o <- do.call(order, c(coords.out2, deparsed, args))
+            dep.ranks <- rank(deparsed, ties.method="min")
+            rank.dex <- selfmatch(dep.ranks)
+            output[curo] <- output[curo][rank.dex]
+        }
     }
 
-    o
+    output
 })
