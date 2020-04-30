@@ -14,7 +14,7 @@ setMethod("bindROWS", ".PointsVector", function(x, objects=list(), use.names=TRU
     all.coords <- do.call(rbind, c(list(coordinates(ref)), obj.coords))
 
     if (is(ref, "SpatialPointsDataFrame")) {
-        df <- .combine_df(ref, others, nrow(all.coords))
+        df <- .combine_df(ref, others, nrow(all.coords), ignore.mcols=ignore.mcols)
         pointers <- SpatialPointsDataFrame(all.coords, df, proj4string=.get_proj4string(ref))
     } else {
         pointers <- SpatialPoints(all.coords, proj4string=.get_proj4string(ref))

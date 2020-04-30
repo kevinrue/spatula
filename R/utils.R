@@ -8,8 +8,8 @@
 
 .get_proj4string <- function(s) s@proj4string
 
-.combine_df <- function(ref, others, N) {
-    if (!ignore.mcols) {
+.combine_df <- function(ref, others, N, ignore.mcols) {
+    if (ignore.mcols) {
         data.frame(matrix(0L, N, 0L))
     } else {
         obj.df <- lapply(others, .get_data)

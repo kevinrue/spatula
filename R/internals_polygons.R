@@ -38,7 +38,7 @@ setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=T
     all.poly <- .uniquify_ids(all.poly)
     polys <- SpatialPolygons(all.poly, proj4string=.get_proj4string(ref))
     if (is(ref, "SpatialPolygonsDataFrame")) {
-        df <- .combine_df(ref, others, length(all.poly))
+        df <- .combine_df(ref, others, length(all.poly), ignore.mcols=ignore.mcols)
         rownames(df) <- .get_ids(all.poly)
         polys <- SpatialPolygonsDataFrame(polys, df, match.ID=FALSE)
     }
