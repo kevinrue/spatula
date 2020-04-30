@@ -1,4 +1,12 @@
-.PolygonsVector <- function(x) new(".PolygonsVector", spatial=x)
+.PolygonsVector <- function(x) {
+    X <- new(".PolygonsVector", spatial=x)
+
+    # What on earth is going on here? SpatialPolygonsDF
+    # gets coerced to a SpatialPolygons by new()!
+    X@spatial <- x
+
+    X
+}
 
 #' @importFrom S4Vectors vertical_slot_names
 setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
@@ -16,7 +24,7 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
 .uniquify_ids <- function(pl) {
     ids <- .get_ids(pl)
     if (anyDuplicated(ids)) {
-        ids <- make.names(ids, unique=TRUE)
+        ids <- make.unique(ids)
         for (i in seq_along(pl)) {
             pl[[i]]@ID <- ids[i]
         }
@@ -43,7 +51,8 @@ setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=T
         polys <- SpatialPolygonsDataFrame(polys, df, match.ID=FALSE)
     }
 
-    initialize(x, spatial=polys)
+    x@spatial <- polys
+    x
 })
 
 .wipe_id <- function(x) {
