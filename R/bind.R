@@ -57,9 +57,17 @@ setMethod("c", "SpatialPolygons", function(x, ..., ignore.mcols = FALSE, recursi
 })
 
 #' @export
+#' @importFrom sp SpatialPolygons SpatialPolygonsDataFrame
 setMethod("[", "SpatialPolygons", function(x, i, j, ..., drop = TRUE) {
-   # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
-   x@polygons <- .uniquify_ids(x@polygons[i])
-   x@plotOrder <- integer(0)
-   x
+    # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
+    all.poly <- .uniquify_ids(.get_polygons(x)[i])
+    polys <- SpatialPolygons(all.poly, proj4string=.get_proj4string(x))
+
+    if (is(x, "SpatialPolygonsDataFrame")) {
+        df <- .get_data(x)
+        rownames(df) <- .get_ids(all.poly)
+        polys <- SpatialPolygonsDataFrame(polys, df, match.ID=FALSE)
+    }
+
+    polys
 })
