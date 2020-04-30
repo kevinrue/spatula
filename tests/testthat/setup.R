@@ -13,14 +13,15 @@ pointsdf2 <- SpatialPointsDataFrame(coords2, data.frame(X=tail(LETTERS, nrow(coo
 
 # SpatialPolygons:
 polys1 <- makeSpatialPolygons(
-    rbind(c(0,0), c(0.5, 0.2), c(0.2, 0.6), c(0.9, 0.8)),
-    rbind(c(1,1), c(0.3, 0.7), c(0.1, 0.2), c(0.8, 0.3))
+    matrix(runif(10), ncol=2),
+    matrix(rnorm(8), ncol=2),
+    matrix(rnorm(20), ncol=2),
+    matrix(rnorm(16), ncol=2)
 )
 
 polys2 <- makeSpatialPolygons(
-    matrix(runif(10), ncol=2),
-    matrix(rnorm(8), ncol=2),
-    matrix(rnorm(20), ncol=2)
+    rbind(c(0,0), c(0.5, 0.2), c(0.2, 0.6), c(0.9, 0.8)),
+    rbind(c(1,1), c(0.3, 0.7), c(0.1, 0.2), c(0.8, 0.3))
 )
 
 # SpatialPolygonsDataFrame:
