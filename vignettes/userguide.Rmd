@@ -11,7 +11,7 @@ output:
 package: spatula
 ---
 
-```{r}
+```{r, echo=FALSE}
 knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 library(BiocStyle)
 set.seed(1000)
@@ -135,13 +135,30 @@ hits
 ```
 
 We use the same method to identify which polygons overlap each other, 
-though this requires further installation of the `r CRANpkg("rgeos")` package:
+though this requires further installation of the `r CRANpkg("rgeos")` package.
+(We do not install this automatically to avoid a hard requirement for system dependencies when using `r Biocpkg("spatula")`.)
 
 ```{r}
 other.poly <- makeSpatialPolygons(
     rbind(c(0.1,0.1), c(0.4, 0.1), c(0.4, 0.4), c(0.1, 0.4))
 )
 findOverlaps(poly, other.poly)
+```
+
+`findOverlaps()` will respond to the `maxgap=` argument, 
+which specifies the minimum (Euclidean) distance between elements to consider them as overlapping.
+For points, the default `maxgap=1e-8` means that it can effectively be used as an error-tolerant version of `match()`:
+
+```{r}
+# Matching entities within the same set of points:
+findOverlaps(points)
+```
+
+The `maxgap=` arugment can also be applied to overlaps between points and polygons or between polygons themselves.
+However, doing so requires installation of the `r CRANpkg("rgeos")` package.
+
+```{r}
+findOverlaps(points, poly, maxgap=0.1)
 ```
 
 # Session information
