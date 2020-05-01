@@ -85,7 +85,10 @@ NULL
 
     if (select=="all") {
         LEFT <- rep(seq_along(searched), lengths(searched))
-        RIGHT <- unlist(searched)
+        RIGHT <- as.integer(unlist(searched))
+        o <- order(LEFT, RIGHT)
+        LEFT <- LEFT[o]
+        RIGHT <- RIGHT[o]
 
         if (is.null(nsubjects)) {
             hits <- SelfHits(from=LEFT, to=RIGHT, nnode=nqueries)
@@ -148,18 +151,18 @@ setMethod("findOverlaps", c("SpatialPoints", "missing"),
     if (maxgap==0) {
         if (select %in% c("first", "arbitrary")) {
             idx <- over(query, subject, returnList=FALSE)
-            return(idx)
+            return(unname(idx))
         } else {
             ov <- over(query, subject, returnList=TRUE)
             LEFT <- rep(seq_along(query), lengths(ov))
-            RIGHT <- unlist(ov, use.names=FALSE)
+            RIGHT <- as.integer(unlist(ov, use.names=FALSE))
         }
     } else {
         # TODO: do this in chunks, so as to avoid blowing up memory.
         collected <- rgeos::gWithinDistance(query, subject, dist=maxgap, byid=TRUE)
         indices <- arrayInd(which(collected), dim(collected))
-        LEFT <- indices[,1]
-        RIGHT <- indices[,2]
+        LEFT <- indices[,2]
+        RIGHT <- indices[,1]
     }
 
     if (self) {
