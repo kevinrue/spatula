@@ -3,6 +3,22 @@
 #' Wrappers around the \code{findOverlaps} machinery from the \pkg{IRanges} package,
 #' to allow them to work with various \pkg{sp} classes.
 #'
+#' @section Finding overlaps between points:
+#' \code{findOverlaps(query, subject, maxgap=1e-8, minoverlap=NULL, 
+#' type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
+#' finds all overlaps between the \linkS4class{SpatialPoints} objects \code{query} and \code{subject}.
+#' A point is considered to overlap another if they lie within \code{maxgap} of each other;
+#' the default non-zero \code{maxgap} means that this function effectively serves as an error-tolerant version of \code{\link{match}}.
+#' 
+#' By default, it returns a \linkS4class{Hits} object specifying pairs of overlapping entries between \code{query} and \code{subject};
+#' for other values of \code{select}, it instead returns an integer vector of length equal to \code{query},
+#' containing the entry with the specified type of overlap in \code{subject}.
+#'
+#' \code{subject} may also be missing, in which case overlaps are found between points in \code{query}.
+#' In this case, a \linkS4class{SelfHits} object is returned when \code{select="all"}.
+#'
+#' \code{minoverlap} and \code{type} are currently ignored.
+#'
 #' @section Finding overlaps:
 #' \code{findOverlaps(query, subject, maxgap=NULL, minoverlap=NULL, 
 #' type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
@@ -40,10 +56,69 @@
 #'
 #' @name findOverlaps
 #' @aliases
+#' findOverlaps,SpatialPoints,missing-method
+#' findOverlaps,SpatialPoints,SpatialPolygons-method
 #' findOverlaps,SpatialPoints,SpatialPolygons-method
 #' findOverlaps,SpatialPolygons,SpatialPoints-method
 #' findOverlaps,SpatialPolygons,SpatialPolygons-method
 NULL
+
+########################################
+
+#' @importFrom S4Vectors SelfHits Hits selectHits
+.process_search_output <- function(searched, select, nsubjects) {
+    nqueries <- length(searched)
+
+    if (select=="all") {
+        LEFT <- rep(seq_along(searched), lengths(searched))
+        RIGHT <- unlist(searched)
+
+        if (is.na(nsubjects)) {
+            hits <- SelfHits(from=LEFT, to=RIGHT, nnode=nqueries)
+        } else {
+            hits <- Hits(from=LEFT, to=RIGHT, nLnode=nqueries, nRnode=nsubjects)
+        }
+        return(selectHits(hits, select=select))
+    }
+
+    if (select=="first") {
+        FUN <- min
+    } else if (select=="last") {
+        FUN <- max
+    } else {
+        FUN <- function(x) x[1]
+    }
+
+    has.any <- lengths(searched) > 0
+    output <- rep(NA_integer_, nqueries)
+    output[has.any] <- vapply(searched[has.any], FUN, 0L)
+    output
+}
+
+#' @export
+#' @importFrom S4Vectors Hits selectHits
+#' @importFrom BiocNeighbors queryNeighbors VptreeParam
+setMethod("findOverlaps", c("SpatialPoints", "SpatialPoints"), 
+    function(query, subject, maxgap = 1e-8, minoverlap = NULL, type = NULL, 
+        select = c("all", "first", "last", "arbitrary"), ...) 
+{
+    searched <- queryNeighbors(query=coordinates(query), X=coordinates(subject), 
+        threshold=maxgap, BNPARAM=VptreeParam(), get.distance=FALSE) # VP-trees are pretty fast at low dimensions.
+    .process_search_output(searched$index, select=match.arg(select), nsubjects=length(subject))
+})
+
+#' @export
+#' @importFrom BiocNeighbors findNeighbors VptreeParam
+#' @importFrom S4Vectors SelfHits selectHits
+setMethod("findOverlaps", c("SpatialPoints", "missing"), 
+    function(query, subject, maxgap = 1e-8, minoverlap = NULL, type = NULL, 
+        select = c("all", "first", "last", "arbitrary"), ...) 
+{
+    searched <- findNeighbors(coordinates(query), threshold=maxgap, BNPARAM=VptreeParam(), get.distance=FALSE)
+    .process_search_output(searched$index, select=match.arg(select), nsubjects=NA)
+})
+
+########################################
 
 #' @importFrom sp over geometry
 #' @importFrom S4Vectors Hits selectHits
