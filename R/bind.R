@@ -1,65 +1,59 @@
-#' Combining \pkg{sp} class objects
+#' ROWS methods for Spatial objects
 #'
-#' Utilities to combine instances of \pkg{sp} classes.
-#' Perhaps these would have a better home in \pkg{sp} itself,
-#' but until then, here we are.
-#'
-#' @param x,... Multiple \linkS4class{SpatialPoints} objects of the same dimensionality.
-#'
-#' Alternatively, multiple \linkS4class{SpatialPolygons} objects.
-#' @param ignore.mcols,recursive Further arguments passed to \code{\link{c,Vector-method}}.
-#'
-#' @return An object of the same class as \code{x} containing coordinates from all objects in \code{...}.
+#' Implements methods for \code{\link{bindROWS}} and \code{\link{extractROWS}} 
+#' for \linkS4class{SpatialPoints} and \linkS4class{SpatialPolygons} objects,
+#' so that they are compatible with Bioconductor containers.
+#' See the \pkg{S4Vectors} package for more details.
 #'
 #' @author Aaron Lun
-#'
 #' @examples
-#' # SpatialPoints:
+#' # Storing Spatial classes in containers:
 #' coords <- matrix(runif(30), nrow=10)
-#' X <- sp::SpatialPoints(coords)
-#'
+#' X <- DataFrame(location=I(sp::SpatialPoints(coords)))
+#' 
 #' coords2 <- matrix(runif(15), nrow=5)
-#' Y <- sp::SpatialPoints(coords2)
+#' Y <- DataFrame(location=I(sp::SpatialPoints(coords2)))
 #'
-#' c(X, Y, X, Y) 
-#'
-#' # SpatialPolygons:
-#' spm <- makeSpatialPolygons(
-#'     rbind(c(0,0), c(0.5, 0.2), c(0.2, 0.6), c(0.9, 0.8)),
-#'     rbind(c(1,1), c(0.3, 0.7), c(0.1, 0.2), c(0.8, 0.3))
-#' )
-#'
-#' spm2 <- makeSpatialPolygons(
-#'     matrix(runif(10), ncol=2),
-#'     matrix(rnorm(8), ncol=2)
-#' )
-#'
-#' c(spm, spm2)
-#'
+#' # Subsetting and such just works:
+#' rbind(X, Y)
+#' X[1:10,,drop=FALSE]
+#' 
+#' @docType methods
 #' @name spatula-bind
-#' @aliases [,SpatialPolygons-method
-#'
+#' @aliases
+#' bindROWS,SpatialPoints-method
+#' bindROWS,SpatialPolygons-method
+#' extractROWS,SaptialPolygons-method
+NULL
+
 #' @export
-#' @importMethodsFrom S4Vectors c
-setMethod("c", "SpatialPoints", function(x, ..., ignore.mcols = FALSE, recursive = FALSE) {
-    stuff <- lapply(list(...), .PointsVector)
-    out <- do.call(c, c(list(.PointsVector(x)), stuff, list(ignore.mcols=ignore.mcols, recursive=recursive)))
+#' @rdname spatula-bind
+#' @importFrom S4Vectors bindROWS
+setMethod("bindROWS", "SpatialPoints", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
+    out <- bindROWS(.PointsVector(x), lapply(objects, .PointsVector),
+        ignore.mcols=ignore.mcols, use.names=use.names, check=check)
     out@spatial
 })
 
 #' @export
 #' @rdname spatula-bind
-#' @importMethodsFrom S4Vectors c
-setMethod("c", "SpatialPolygons", function(x, ..., ignore.mcols = FALSE, recursive = FALSE) {
-    stuff <- lapply(list(...), .PolygonsVector)
-    out <- do.call(c, c(list(.PolygonsVector(x)), stuff, list(ignore.mcols=ignore.mcols, recursive=recursive)))
+#' @importFrom S4Vectors bindROWS
+setMethod("bindROWS", "SpatialPolygons", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
+    out <- bindROWS(.PointsVector(x), lapply(objects, .PointsVector),
+        ignore.mcols=ignore.mcols, use.names=use.names, check=check)
     out@spatial
 })
 
 #' @export
-setMethod("[", "SpatialPolygons", function(x, i, j, ..., drop = TRUE) {
-   # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
-   x@polygons <- .uniquify_ids(x@polygons[i])
-   x@plotOrder <- integer(0)
-   x
+#' @rdname spatula-bind
+#' @importFrom S4Vectors extractROWS
+setMethod("extractROWS", "SpatialPolygons", function(x, i) {
+    # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
+    ids <- .get_ids(x@polygons)
+    if (anyDuplicated(ids[i])) {
+        ids[i] <- make.unique(ids[i])
+        ok <- .replace_ids(pl, ids)
+    }
+
+    x[i]
 })

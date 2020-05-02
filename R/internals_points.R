@@ -6,21 +6,12 @@ setMethod("vertical_slot_names", ".PointsVector", function(x) {
 })
 
 #' @importFrom S4Vectors bindROWS
-#' @importFrom sp coordinates SpatialPoints SpatialPointsDataFrame
+#' @importFrom sp rbind.SpatialPoints rbind.SpatialPointsDataFrame
 setMethod("bindROWS", ".PointsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
     ref <- .as_spatial(x)
-    others <- lapply(objects, .as_spatial)
-    obj.coords <- lapply(others, coordinates)
-    all.coords <- do.call(rbind, c(list(coordinates(ref)), obj.coords))
-
-    if (is(ref, "SpatialPointsDataFrame")) {
-        df <- .combine_df(ref, others, nrow(all.coords), ignore.mcols=ignore.mcols)
-        pointers <- SpatialPointsDataFrame(all.coords, df, proj4string=.get_proj4string(ref))
-    } else {
-        pointers <- SpatialPoints(all.coords, proj4string=.get_proj4string(ref))
-    }
-
-    initialize(x, spatial=pointers)
+    obj <- lapply(objects, .as_spatial)
+    out <- do.call(rbind, c(list(ref), obj))
+    initialize(x, spatial=out)
 })
 
 #' @importFrom S4Vectors sameAsPreviousROW

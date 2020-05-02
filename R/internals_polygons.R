@@ -13,7 +13,7 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
     c("spatial", callNextMethod())
 })
 
-# UGH! Need raw access to SpatialPolygons' `polygon` field.
+# UGH! Need raw access to SpatialPolygons' `polygon` and `ID` fields.
 # The obvious getter `polygons()` doesn't do what you might expect!
 .get_polygons <- function(sp) sp@polygons
 
@@ -21,38 +21,32 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
     vapply(pl, slot, name="ID", "")
 }
 
-.uniquify_ids <- function(pl) {
-    ids <- .get_ids(pl)
-    if (anyDuplicated(ids)) {
-        ids <- make.unique(ids)
-        for (i in seq_along(pl)) {
-            pl[[i]]@ID <- ids[i]
-        }
+.replace_ids <- function(pl, ids) {
+    for (i in seq_along(pl)) {
+        pl[[i]]@ID <- ids[i]
     }
-    pl 
+    pl
 }
 
 #' @importFrom S4Vectors bindROWS
-#' @importFrom sp SpatialPolygons SpatialPolygonsDataFrame
+#' @importFrom sp rbind.SpatialPolygons rbind.SpatialPolygonsDataFrame
 setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
     ref <- .as_spatial(x)
-    others <- lapply(objects, .as_spatial)
+    obj <- lapply(objects, .as_spatial)
 
-    obj.poly <- lapply(others, .get_polygons)
-    obj.poly <- unlist(obj.poly, recursive=FALSE)
-    ref.poly <- .get_polygons(ref)
-    all.poly <- c(ref.poly, obj.poly)
+    # Hacking our way around the IDs.
+    ref.ids <- .get_ids(ref)
+    obj.ids <- lapply(obj, .get_ids)
+    all.ids <- list(ref.ids, obj.ids)
+    new.ids <- relist(make.unique(unlist(all.ids)), all.ids)
 
-    all.poly <- .uniquify_ids(all.poly)
-    polys <- SpatialPolygons(all.poly, proj4string=.get_proj4string(ref))
-    if (is(ref, "SpatialPolygonsDataFrame")) {
-        df <- .combine_df(ref, others, length(all.poly), ignore.mcols=ignore.mcols)
-        rownames(df) <- .get_ids(all.poly)
-        polys <- SpatialPolygonsDataFrame(polys, df, match.ID=FALSE)
+    ref <- .replace_ids(ref, new.ids[[1]])
+    for (i in seq_along(obj)) {
+        obj[[i]] <- .replace_ids(obj[[i]], new.ids[[2]][[i]])
     }
 
-    x@spatial <- polys
-    x
+    out <- do.call(rbind, c(list(ref), obj))
+    initialize(x, spatial=out)
 })
 
 .wipe_id <- function(x) {
