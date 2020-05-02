@@ -17,6 +17,10 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
 # The obvious getter `polygons()` doesn't do what you might expect!
 .get_polygons <- function(sp) sp@polygons
 
+.get_areas <- function(pl) {
+    vapply(pl, slot, name="area", 0)
+}
+
 .get_ids <- function(pl) {
     vapply(pl, slot, name="ID", "")
 }
