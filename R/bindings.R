@@ -21,12 +21,15 @@
 #' # Works for spatial polygons as well, based on the polygon centroid.
 #' spm <- makeSpatialPolygons(matrix(runif(10), ncol=2), matrix(runif(10), ncol=2))
 #' pX <- DataFrame(poly=I(spm))
+#' pX
 #'
 #' spm2 <- makeSpatialPolygons(matrix(runif(10), ncol=2), matrix(runif(10), ncol=2))
 #' pY <- DataFrame(poly=I(spm2))
+#' pY
 #'
-#' rbind(pX, pY)
-#' pX[c(1,1,2,3,3),,drop=FALSE]
+#' combined <- rbind(pX, pY)
+#' combined
+#' combined[c(1,1,2,3,3),,drop=FALSE]
 #' 
 #' @docType methods
 #' @name spatula-bind
@@ -49,22 +52,26 @@ setMethod("bindROWS", "SpatialPoints", function(x, objects=list(), use.names=TRU
 #' @export
 #' @importFrom S4Vectors bindROWS
 setMethod("bindROWS", "SpatialPolygons", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
-    out <- bindROWS(.PointsVector(x), lapply(objects, .PointsVector),
+    out <- bindROWS(.PolygonsVector(x), lapply(objects, .PolygonsVector),
         ignore.mcols=ignore.mcols, use.names=use.names, check=check)
     out@spatial
 })
 
 #' @export
-#' @importFrom S4Vectors extractROWS
+#' @importFrom S4Vectors extractROWS normalizeSingleBracketSubscript
 setMethod("extractROWS", "SpatialPolygons", function(x, i) {
     # WHAT A PAIN! Need to override sp's refusal to duplicate entries.
-    ids <- .get_ids(x@polygons)
-    if (anyDuplicated(ids[i])) {
-        ids[i] <- make.unique(ids[i])
-        ok <- .replace_ids(pl, ids)
+    ids <- .get_ids(x)
+    i <- normalizeSingleBracketSubscript(i, ids)
+    x@polygons <- x@polygons[i]
+
+    ids <- ids[i]
+    if (anyDuplicated(ids)) {
+        ids <- make.unique(ids)
+        x <- .replace_ids(x, ids)
     }
 
-    x[i]
+    x
 })
 
 #' @importFrom sp coordinates

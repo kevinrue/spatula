@@ -17,19 +17,19 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
 # The obvious getter `polygons()` doesn't do what you might expect!
 .get_polygons <- function(sp) sp@polygons
 
-.get_areas <- function(pl) {
-    vapply(pl, slot, name="area", 0)
+.get_areas <- function(sp) {
+    vapply(.get_polygons(sp), slot, name="area", 0)
 }
 
-.get_ids <- function(pl) {
-    vapply(pl, slot, name="ID", "")
+.get_ids <- function(sp) {
+    vapply(.get_polygons(sp), slot, name="ID", "")
 }
 
-.replace_ids <- function(pl, ids) {
-    for (i in seq_along(pl)) {
-        pl[[i]]@ID <- ids[i]
+.replace_ids <- function(sp, ids) {
+    for (i in seq_along(.get_polygons(sp))) {
+        sp@polygons[[i]]@ID <- ids[i]
     }
-    pl
+    sp
 }
 
 #' @importFrom S4Vectors bindROWS
