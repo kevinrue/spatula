@@ -20,7 +20,7 @@
 #' \code{minoverlap} and \code{type} are currently ignored.
 #'
 #' @section Finding overlaps between points and polygons:
-#' \code{findOverlaps(query, subject, maxgap=NULL, minoverlap=NULL, 
+#' \code{findOverlaps(query, subject, maxgap=0, minoverlap=NULL, 
 #' type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
 #' finds the specified overlaps between \code{query} and \code{subject},
 #' where one is a \linkS4class{SpatialPoints} and the other is a \linkS4class{SpatialPolygons}.
@@ -36,7 +36,7 @@
 #' \code{minoverlap} and \code{type} are currently ignored.
 #'
 #' @section Finding overlaps between polygons:
-#' \code{findOverlaps(query, subject, maxgap=NULL, minoverlap=NULL, 
+#' \code{findOverlaps(query, subject, maxgap=0, minoverlap=0, 
 #' type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
 #' finds the specified overlaps between the \linkS4class{SpatialPolygons} objects \code{query} and \code{subject}.
 #' This requires the additional installation of the \pkg{rgeos} package.
@@ -49,8 +49,9 @@
 #' In this case, a \linkS4class{SelfHits} object is returned when \code{select="all"}.
 #'
 #' If \code{maxgap} is specified, overlaps are reported between polygons if their edges or vertices lie within \code{maxgap} of each other.
+#' If \code{minoverlap} is specified, overlaps are only reported if the area of the intersection between two polygons is greater than \code{minoverlap}.
 #'
-#' \code{minoverlap} and \code{type} are currently ignored.
+#' \code{type} is currently ignored.
 #'
 #' @author Aaron Lun
 #'
@@ -191,20 +192,46 @@ setMethod("findOverlaps", c("SpatialPolygons", "SpatialPoints"),
     .overlapper(query, subject, select=match.arg(select), maxgap=maxgap)
 })
 
+########################################
+
+#' @importFrom S4Vectors queryHits subjectHits extractROWS
+#' @importFrom IRanges pintersect
+.apply_minoverlap <- function(olap, query, subject, minoverlap) {
+    inter <- pintersect(extractROWS(query, queryHits(olap)), 
+        extractROWS(subject, subjectHits(olap)))
+    olap[.get_areas(inter) >= minoverlap]
+}
+
 #' @export
+#' @importFrom S4Vectors selectHits
 #' @importFrom IRanges findOverlaps
 setMethod("findOverlaps", c("SpatialPolygons", "SpatialPolygons"), 
-    function(query, subject, maxgap = 0, minoverlap = NULL, type = NULL, 
+    function(query, subject, maxgap = 0, minoverlap = 0, type = NULL, 
         select = c("all", "first", "last", "arbitrary"), ...) 
 {
-    .overlapper(query, subject, select=match.arg(select), maxgap=maxgap)
+    select <- match.arg(select)
+    if (minoverlap==0) {
+        .overlapper(query, subject, select=select, maxgap=maxgap)
+    } else {
+        out <- .overlapper(query, subject, select="all", maxgap=0)
+        out <- .apply_minoverlap(out, query=query, subject=subject, minoverlap=minoverlap)
+        selectHits(out, select=select)
+    }
 })
 
 #' @export
+#' @importFrom S4Vectors selectHits
 #' @importFrom IRanges findOverlaps
 setMethod("findOverlaps", c("SpatialPolygons", "missing"), 
-    function(query, subject, maxgap = 0, minoverlap = NULL, type = NULL, 
+    function(query, subject, maxgap = 0, minoverlap = 0, type = NULL, 
         select = c("all", "first", "last", "arbitrary"), ...) 
 {
-    .overlapper(query, subject=NULL, select=match.arg(select), maxgap=maxgap)
+    select <- match.arg(select)
+    if (minoverlap==0) {
+        .overlapper(query, subject=NULL, select=match.arg(select), maxgap=maxgap)
+    } else {
+        out <- .overlapper(query, subject=NULL, select="all", maxgap=0)
+        out <- .apply_minoverlap(out, query=query, subject=query, minoverlap=minoverlap)
+        selectHits(out, select=select)
+    }
 })
