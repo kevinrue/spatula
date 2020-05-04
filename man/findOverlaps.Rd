@@ -3,9 +3,11 @@
 \name{findOverlaps}
 \alias{findOverlaps}
 \alias{findOverlaps,SpatialPoints,missing-method}
+\alias{findOverlaps,SpatialPoints,SpatialPoints-method}
 \alias{findOverlaps,SpatialPoints,SpatialPolygons-method}
 \alias{findOverlaps,SpatialPolygons,SpatialPoints-method}
 \alias{findOverlaps,SpatialPolygons,SpatialPolygons-method}
+\alias{findOverlaps,SpatialPolygons,missing-method}
 \title{Find overlaps in spatial data}
 \description{
 Wrappers around the \code{findOverlaps} machinery from the \pkg{IRanges} package,
