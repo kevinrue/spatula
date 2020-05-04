@@ -8,17 +8,20 @@ Description:
     like the SummarizedExperiment container.
 Depends: 
     sp,
-    S4Vectors,
-    IRanges
+    S4Vectors
 Imports:
+    utils,
+    methods,
     BiocGenerics,
+    IRanges,
     BiocNeighbors
 Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
     testthat,
-    rgeos
+    rgeos,
+    SummarizedExperiment
 Authors@R: c(person("Aaron", "Lun", role=c("aut", "cre"), email='infinite.monkeys.with.keyboards@gmail.com'),
     person("Kevin", "Rue-Albrecht", role=c("aut"), email='kevinrue67@gmail.com'))
 VignetteBuilder: knitr
