@@ -51,7 +51,10 @@ setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=T
     }
 
     out <- do.call(rbind, c(list(ref), obj))
-    initialize(x, spatial=out)
+
+    # Can't use 'initialize()', see above.
+    x@spatial <- out
+    x
 })
 
 .wipe_id <- function(x) {
