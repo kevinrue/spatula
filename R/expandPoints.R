@@ -37,7 +37,7 @@ expandPoints <- function(x, radius, resolution=20) {
     coords <- coordinates(x)
     all.circles <- vector("list", length(x))
     for (i in seq_along(x)) {
-        all.circles[[i]] <- cbind(X * radius[i] + coords[i,1], Y * radius[i]  coords[i,2])
+        all.circles[[i]] <- cbind(X * radius[i] + coords[i,1], Y * radius[i] + coords[i,2])
     }
 
     do.call(makeSpatialPolygons, all.circles)
