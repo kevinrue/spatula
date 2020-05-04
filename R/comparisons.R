@@ -105,6 +105,9 @@
 #' Ops,SpatialPolygons,SpatialPolygons-method
 #' match,SpatialPolygons,SpatialPolygons-method
 #' %in%,SpatialPolygons,SpatialPolygons-method
+#'
+#' order,.PointsVector-method
+#' order,.PolygonsVector-method
 NULL
 
 #####################

@@ -37,8 +37,12 @@
 #' bindROWS,SpatialPoints-method
 #' bindROWS,SpatialPolygons-method
 #' extractROWS,SpatialPolygons-method
+#' extractROWS,SpatialPolygons,ANY-method
 #' showAsCell,SpatialPoints-method
 #' showAsCell,SpatialPolygons-method
+#'
+#' bindROWS,.PointsVector-method
+#' bindROWS,.PolygonsVector-method
 NULL
 
 #' @export
@@ -83,9 +87,11 @@ setMethod("extractROWS", "SpatialPolygons", function(x, i) {
 }
 
 #' @export
+#' @importFrom S4Vectors showAsCell
 #' @importFrom sp SpatialPoints
 setMethod("showAsCell", "SpatialPoints", .coord_shower)
 
 #' @export
+#' @importFrom S4Vectors showAsCell
 #' @importFrom sp SpatialPolygons
 setMethod("showAsCell", "SpatialPolygons", .coord_shower) # uses the lab_pts, probably the average.
