@@ -2,6 +2,7 @@
 % Please edit documentation in R/findOverlaps.R
 \name{findOverlaps}
 \alias{findOverlaps}
+\alias{findOverlaps,SpatialPoints,missing-method}
 \alias{findOverlaps,SpatialPoints,SpatialPolygons-method}
 \alias{findOverlaps,SpatialPolygons,SpatialPoints-method}
 \alias{findOverlaps,SpatialPolygons,SpatialPolygons-method}
@@ -10,25 +11,60 @@
 Wrappers around the \code{findOverlaps} machinery from the \pkg{IRanges} package,
 to allow them to work with various \pkg{sp} classes.
 }
-\section{Finding overlaps}{
+\section{Finding overlaps between points}{
 
-\code{findOverlaps(query, subject, maxgap=NULL, minoverlap=NULL, 
+\code{findOverlaps(query, subject, maxgap=1e-8, minoverlap=NULL, 
 type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
-finds the specified overlaps between \code{query} and \code{subject}.
+finds all overlaps between the \linkS4class{SpatialPoints} objects \code{query} and \code{subject}.
+A point is considered to overlap another if they lie within \code{maxgap} of each other;
+the default non-zero \code{maxgap} means that this function effectively serves as an error-tolerant version of \code{\link{match}}.
+
+By default, it returns a \linkS4class{Hits} object specifying pairs of overlapping entries between \code{query} and \code{subject}.
+for other values of \code{select}, it instead returns an integer vector of length equal to \code{query},
+containing the entry with the specified type of overlap in \code{subject}.
+
+\code{subject} may also be missing, in which case overlaps are found between points in \code{query}.
+In this case, a \linkS4class{SelfHits} object is returned when \code{select="all"}.
+
+\code{minoverlap} and \code{type} are currently ignored.
+}
+
+\section{Finding overlaps between points and polygons}{
+
+\code{findOverlaps(query, subject, maxgap=0, minoverlap=NULL, 
+type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
+finds the specified overlaps between \code{query} and \code{subject},
+where one is a \linkS4class{SpatialPoints} and the other is a \linkS4class{SpatialPolygons}.
+
 By default, it returns a \linkS4class{Hits} object specifying pairs of overlapping entries between \code{query} and \code{subject};
 for other values of \code{select}, it instead returns an integer vector of length equal to \code{query},
 containing the entry with the specified type of overlap in \code{subject}.
 
-Methods are currently provided for the following combinations of classes:
-\itemize{
-\item \code{query} is a \linkS4class{SpatialPoints} instance,
-\code{subject} is a \linkS4class{SpatialPolygons} instance (and vice versa).
-\item \code{query} and \code{subject} are both \linkS4class{SpatialPolygons} instances.
-This requires installation of the \pkg{rgeos} package.
-}
-Any \code{*DataFrame} subclasses of the above instances can also be supplied.
+If \code{maxgap} is specified, overlaps are reported between points and polygons 
+if the former lies within \code{maxgap} of the closest edge/vertex of the latter.
+Note that this requires the additional installation of the \pkg{rgeos} package.
 
-\code{maxgap}, \code{minoverlap} and \code{type} are currently ignored.
+\code{minoverlap} and \code{type} are currently ignored.
+}
+
+\section{Finding overlaps between polygons}{
+
+\code{findOverlaps(query, subject, maxgap=0, minoverlap=0, 
+type=NULL, select=c("all", "first", "last", "arbitrary"), ...)}
+finds the specified overlaps between the \linkS4class{SpatialPolygons} objects \code{query} and \code{subject}.
+This requires the additional installation of the \pkg{rgeos} package.
+
+By default, it returns a \linkS4class{Hits} object specifying pairs of overlapping entries between \code{query} and \code{subject}.
+For other values of \code{select}, it instead returns an integer vector of length equal to \code{query},
+containing the entry with the specified type of overlap in \code{subject}.
+
+\code{subject} may also be missing, in which case overlaps are found between points in \code{query}.
+In this case, a \linkS4class{SelfHits} object is returned when \code{select="all"}.
+
+If \code{maxgap} is specified, overlaps are reported between polygons if their edges or vertices lie within \code{maxgap} of each other.
+If \code{minoverlap} is specified, overlaps are only reported if the area of the intersection between two polygons is greater than \code{minoverlap}.
+
+\code{type} is currently ignored.
 }
 
 \examples{
