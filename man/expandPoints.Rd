@@ -30,6 +30,7 @@ given that \pkg{sp} does not (seem to?) have a natural way of representing pure 
 coords <- matrix(runif(30), nrow=10)
 X <- sp::SpatialPoints(coords)
 Y <- expandPoints(X, runif(10))
+plot(Y)
 
 }
 \seealso{
