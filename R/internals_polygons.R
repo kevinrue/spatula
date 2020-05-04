@@ -33,6 +33,7 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
 }
 
 #' @importFrom S4Vectors bindROWS
+#' @importFrom utils relist
 #' @importFrom sp rbind.SpatialPolygons rbind.SpatialPolygonsDataFrame
 setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
     ref <- .as_spatial(x)

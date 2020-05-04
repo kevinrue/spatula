@@ -71,11 +71,13 @@
 #'
 #' @name findOverlaps
 #' @aliases
+#' findOverlaps
 #' findOverlaps,SpatialPoints,missing-method
-#' findOverlaps,SpatialPoints,SpatialPolygons-method
+#' findOverlaps,SpatialPoints,SpatialPoints-method
 #' findOverlaps,SpatialPoints,SpatialPolygons-method
 #' findOverlaps,SpatialPolygons,SpatialPoints-method
 #' findOverlaps,SpatialPolygons,SpatialPolygons-method
+#' findOverlaps,SpatialPolygons,missing-method
 NULL
 
 ########################################
@@ -235,3 +237,6 @@ setMethod("findOverlaps", c("SpatialPolygons", "missing"),
         selectHits(out, select=select)
     }
 })
+
+#' @export
+IRanges::findOverlaps

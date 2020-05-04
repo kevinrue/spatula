@@ -26,6 +26,7 @@
 #' \code{\link{makeSpatialPolygons}}, for more general construction of \linkS4class{SpatialPolygons} objects.
 #'
 #' @export
+#' @importFrom utils head
 #' @importFrom sp coordinates
 expandPoints <- function(x, radius, resolution=20) {
     radius <- rep(radius, length.out=length(x))
