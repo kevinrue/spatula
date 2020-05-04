@@ -151,7 +151,10 @@ setMethod("findOverlaps", c("SpatialPoints", "missing"),
         subject <- geometry(subject)
     }
 
-    if (maxgap==0) {
+    if (!length(query) || !length(subject)) { 
+        # because rgeos can't handle zero-length queries.
+        LEFT <- RIGHT <- integer(0)
+    } else if (maxgap==0) {
         if (select %in% c("first", "arbitrary")) {
             idx <- over(query, subject, returnList=FALSE)
             return(unname(idx))
