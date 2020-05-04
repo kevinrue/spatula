@@ -17,8 +17,8 @@ test_that("SpatialPoints comparisons work as expected", {
     expect_identical(points1 %in% points1[chosen], !is.na(m))
 
     # Duplication.
-    expect_identical(BiocGenerics::unique(c(points1, points1)), points1)
-    expect_identical(BiocGenerics::unique(c(points1, points2)), c(points1, points2))
+    expect_identical(BiocGenerics::unique(rbind(points1, points1)), points1)
+    expect_identical(BiocGenerics::unique(rbind(points1, points2)), rbind(points1, points2))
 
     # Ordering.
     o <- order(points1)
@@ -42,8 +42,8 @@ test_that("SpatialPointsDataFrame comparisons work as expected", {
     expect_identical(pointsdf1 %in% pointsdf1[chosen,], !is.na(m))
 
     # Duplication.
-    expect_identical(BiocGenerics::unique(c(pointsdf1, pointsdf1)), pointsdf1)
-    expect_identical(BiocGenerics::unique(c(pointsdf1, pointsdf2)), c(pointsdf1, pointsdf2))
+    expect_identical(BiocGenerics::unique(rbind(pointsdf1, pointsdf1)), pointsdf1)
+    expect_identical(BiocGenerics::unique(rbind(pointsdf1, pointsdf2)), rbind(pointsdf1, pointsdf2))
 
     # Ordering.
     o <- order(pointsdf1)
@@ -67,13 +67,16 @@ test_that("SpatialPolygons comparisons work as expected", {
     expect_identical(polys1 %in% polys1[chosen], !is.na(m))
 
     # Duplication.
-    expect_identical(BiocGenerics::unique(c(polys1, polys1)), polys1)
-    expect_identical(BiocGenerics::unique(c(polys1, polys2)), c(polys1, polys2))
+    self <- BiocGenerics::unique(bindROWS(polys1, list(polys1)))
+    expect_identical(coordinates(self), coordinates(polys1))
+    combined <- bindROWS(polys1, list(polys2))
+    expect_identical(BiocGenerics::unique(combined), combined)
 
     # Ordering.
     o <- order(polys1)
     expect_false(is.unsorted(coordinates(polys1)[o,1]))
-    expect_identical(BiocGenerics::sort(polys1), polys1[o])
+    sorted <- BiocGenerics::sort(polys1)
+    expect_identical(coordinates(sorted), coordinates(polys1)[o,])
 })
 
 test_that("SpatialPolygons comparisons work with tie breaking", {
@@ -124,13 +127,12 @@ test_that("SpatialPolygonsDataFrame comparisons work as expected", {
     expect_identical(polysdf1 %in% polysdf1[chosen,], !is.na(m))
 
     # Duplication.
-    expect_equivalent(BiocGenerics::unique(c(polysdf1, polysdf1)), polysdf1)
-    expect_equivalent(BiocGenerics::unique(c(polysdf1, polysdf2)), c(polysdf1, polysdf2))
+    expect_equivalent(BiocGenerics::unique(rbind(polysdf1, polysdf1)), polysdf1)
+    combined <- bindROWS(polysdf1, list(polysdf2))
+    expect_equivalent(BiocGenerics::unique(combined), combined)
 
     # Ordering.
     o <- order(polysdf1)
     expect_false(is.unsorted(coordinates(polysdf1)[o,1]))
     expect_equivalent(BiocGenerics::sort(polysdf1), polysdf1[o,])
 })
-
-
