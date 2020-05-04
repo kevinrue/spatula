@@ -9,6 +9,10 @@ date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document
 package: spatula
+vignette: >
+  %\VignetteIndexEntry{Spatial classes for Bioconductor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo=FALSE}
@@ -57,21 +61,16 @@ first10 <- se[,1:10]
 first10$location
 ```
 
-# Basic operations on `SpatialPoints`
-
-For reasons unbeknownst to us, `r CRANpkg("sp")` decided not to implement a concatenation operator for their `SpatialPoints` classes.
-So, here it is:
+We can also combine the `SummarizedExperiment` object and the `SpatialPoints` object will be appropriately concatenated:
 
 ```{r}
-coords2 <- matrix(rnorm(20), ncol=2)
-points2 <- SpatialPoints(coords2)
-
-combined <- c(points, points2)
-length(combined)
-head(combined)
+combined <- cbind(se, se)
+length(combined$location)
 ```
 
-We also provide utilities like `sort()` and `unique()` for `SpatialPoints` objects.
+# Basic operations on `SpatialPoints`
+
+We provide utilities like `sort()` and `unique()` for `SpatialPoints` objects.
 Comparisons between points are performed by comparing the vector of coordinates,
 where the "larger" point is the one with the larger value in the first non-tied dimension.
 Obviously, this only works for `SpatialPoints` objects with the same dimensions.
@@ -82,11 +81,24 @@ head(sort(points))
 
 The `match()` function identifies matching points in two different objects,
 which is potentially useful for comparing annotations across different experiments.
-Note that this is done using an exact comparison of the double-precision coordinates, so it literally has to be the exact same point - 
-no tolerance is accepted (see `findOverlaps()` below if that is of interest).
+Note that this is done using an exact comparison of the double-precision coordinates, 
+so it literally has to be the exact same point down to the bits.
+(If tolerance is required, see `findOverlaps()` below instead.)
 
 ```{r}
-match(points2, combined)
+coords2 <- matrix(rnorm(20), ncol=2)
+points2 <- SpatialPoints(coords2)
+longer <- rbind(points, points2)
+match(points, longer)
+match(points2, longer)
+```
+
+We provide a utility to conveniently expand points to their surrounding circles, approximated with circumscribed polygons.
+This is occasionally useful for datasets where locations actually specify a circular region, e.g., array spots.
+
+```{r}
+circles <- expandPoints(points, radius=1)
+plot(circles)
 ```
 
 # Basic operations on `SpatialPolygons`
@@ -115,7 +127,7 @@ X <- DataFrame(polygon=I(poly))
 X
 ```
 
-We also provide methods for `c()`, `sort()`, `unique()` and `match()`, as described above.
+We also provide methods for `sort()`, `unique()` and `match()`, as described above.
 Sorting is performed based on a comparison of the vector of coordinates for the cluster centroids;
 if those are equal, then polygons are sorted by area.
 
@@ -155,7 +167,9 @@ findOverlaps(points)
 ```
 
 The `maxgap=` arugment can also be applied to overlaps between points and polygons or between polygons themselves.
-However, doing so requires installation of the `r CRANpkg("rgeos")` package.
+Furthermore, the `minoverlap=` argument can be applied between polygons 
+to place a minimum threshold on the area of the intersection of overlapping polygons.
+Using these options requires installation of the `r CRANpkg("rgeos")` package.
 
 ```{r}
 findOverlaps(points, poly, maxgap=0.1)
