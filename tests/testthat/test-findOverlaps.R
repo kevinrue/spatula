@@ -126,6 +126,13 @@ test_that("findOverlaps works between two sets of SpatialPolygons", {
     expect_identical(queryHits(hits), rep(seq_along(poly1), each=length(poly1)))
     expect_identical(subjectHits(hits), rep(seq_along(poly1), length(poly1)))
 
+    # Works for minoverlap=.
+    hits <- findOverlaps(poly1, poly2, minoverlap=1)
+    expect_identical(length(hits), 0L) 
+
+    hits <- findOverlaps(poly1, poly2, minoverlap=0.01)
+    expect_identical(hits, findOverlaps(poly1, poly2))
+
     # Works for other select=.
     hits <- findOverlaps(poly1, maxgap=0.2)
     expect_identical(selectHits(hits, "first"), findOverlaps(poly1, maxgap=0.2, select="first"))
