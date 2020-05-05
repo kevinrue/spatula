@@ -26,36 +26,13 @@ setMethod("vertical_slot_names", ".PolygonsVector", function(x) {
 }
 
 .replace_ids <- function(sp, ids) {
-    for (i in seq_along(.get_polygons(sp))) {
-        sp@polygons[[i]]@ID <- ids[i]
+    pl <- .get_polygons(sp)
+    for (i in seq_along(pl)) {
+        pl[[i]]@ID <- ids[i]
     }
+    sp@polygons <- pl
     sp
 }
-
-#' @importFrom S4Vectors bindROWS
-#' @importFrom utils relist
-#' @importFrom sp rbind.SpatialPolygons rbind.SpatialPolygonsDataFrame
-setMethod("bindROWS", ".PolygonsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
-    ref <- .as_spatial(x)
-    obj <- lapply(objects, .as_spatial)
-
-    # Hacking our way around the IDs.
-    ref.ids <- .get_ids(ref)
-    obj.ids <- lapply(obj, .get_ids)
-    all.ids <- list(ref.ids, obj.ids)
-    new.ids <- relist(make.unique(unlist(all.ids)), all.ids)
-
-    ref <- .replace_ids(ref, new.ids[[1]])
-    for (i in seq_along(obj)) {
-        obj[[i]] <- .replace_ids(obj[[i]], new.ids[[2]][[i]])
-    }
-
-    out <- do.call(rbind, c(list(ref), obj))
-
-    # Can't use 'initialize()', see above.
-    x@spatial <- out
-    x
-})
 
 .wipe_id <- function(x) {
     x@ID <- ""

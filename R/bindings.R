@@ -48,17 +48,26 @@ NULL
 #' @export
 #' @importFrom S4Vectors bindROWS
 setMethod("bindROWS", "SpatialPoints", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
-    out <- bindROWS(.PointsVector(x), lapply(objects, .PointsVector),
-        ignore.mcols=ignore.mcols, use.names=use.names, check=check)
-    out@spatial
+    do.call(rbind, c(list(x), objects))
 })
 
 #' @export
 #' @importFrom S4Vectors bindROWS
+#' @importFrom utils relist
+#' @importFrom sp rbind.SpatialPolygons rbind.SpatialPolygonsDataFrame
 setMethod("bindROWS", "SpatialPolygons", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
-    out <- bindROWS(.PolygonsVector(x), lapply(objects, .PolygonsVector),
-        ignore.mcols=ignore.mcols, use.names=use.names, check=check)
-    out@spatial
+    # Hacking our way around the unique ID requirement.
+    ref.ids <- .get_ids(x)
+    obj.ids <- lapply(objects, .get_ids)
+    all.ids <- list(ref.ids, obj.ids)
+    new.ids <- relist(make.unique(unlist(all.ids)), all.ids)
+
+    x <- .replace_ids(x, new.ids[[1]])
+    for (i in seq_along(objects)) {
+        objects[[i]] <- .replace_ids(objects[[i]], new.ids[[2]][[i]])
+    }
+
+    do.call(rbind, c(list(x), objects))
 })
 
 #' @export
@@ -75,7 +84,12 @@ setMethod("extractROWS", "SpatialPolygons", function(x, i) {
         x <- .replace_ids(x, ids)
     }
 
-    x
+    # Triggering clean-up of other slots due to subsetting.
+    if (is.null(dim(x))) {
+        x[seq_along(x)]
+    } else {
+        x[seq_along(x),,drop=FALSE]
+    }
 })
 
 #' @importFrom sp coordinates

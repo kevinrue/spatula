@@ -5,15 +5,6 @@ setMethod("vertical_slot_names", ".PointsVector", function(x) {
     c("spatial", callNextMethod())
 })
 
-#' @importFrom S4Vectors bindROWS
-#' @importFrom sp rbind.SpatialPoints rbind.SpatialPointsDataFrame
-setMethod("bindROWS", ".PointsVector", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
-    ref <- .as_spatial(x)
-    obj <- lapply(objects, .as_spatial)
-    out <- do.call(rbind, c(list(ref), obj))
-    initialize(x, spatial=out)
-})
-
 #' @importFrom S4Vectors sameAsPreviousROW
 setMethod("sameAsPreviousROW", ".PointsVector", function(x) {
     out <- .mat2list(coordinates(.as_spatial(x)))
