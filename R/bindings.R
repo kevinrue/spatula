@@ -35,9 +35,13 @@
 #' @name spatula-bind
 #' @aliases
 #' bindROWS,SpatialPoints-method
+#' extractROWS,SpatialPoints-method
+#' extractROWS,SpatialPoints,ANY-method
+#'
 #' bindROWS,SpatialPolygons-method
 #' extractROWS,SpatialPolygons-method
 #' extractROWS,SpatialPolygons,ANY-method
+#'
 #' showAsCell,SpatialPoints-method
 #' showAsCell,SpatialPolygons-method
 #'
@@ -49,6 +53,13 @@ NULL
 #' @importFrom S4Vectors bindROWS
 setMethod("bindROWS", "SpatialPoints", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
     do.call(rbind, c(list(x), objects))
+})
+
+#' @export
+#' @importFrom S4Vectors extractROWS normalizeSingleBracketSubscript
+setMethod("extractROWS", "SpatialPoints", function(x, i) {
+    i <- normalizeSingleBracketSubscript(i, seq_len(NROW(x)))
+    x[i,] # forcing it to drop, as the sp authors have repurposed drop= to do something else for SpatialPoints' [.
 })
 
 #' @export
@@ -84,12 +95,8 @@ setMethod("extractROWS", "SpatialPolygons", function(x, i) {
         x <- .replace_ids(x, ids)
     }
 
-    # Triggering clean-up of other slots due to subsetting.
-    if (is.null(dim(x))) {
-        x[seq_along(x)]
-    } else {
-        x[seq_along(x),,drop=FALSE]
-    }
+    # Trying to trigger clean-up of other slots. 
+    x[seq_along(x),]
 })
 
 #' @importFrom sp coordinates

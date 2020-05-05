@@ -20,6 +20,9 @@ test_that("rbind() works for SpatialPoints columns", {
     out2 <- rbind(out, points1)
     expect_s4_class(out2$loc, "SpatialPoints")
     expect_identical(coordinates(out2$loc), rbind(coordinates(out$loc), coordinates(points1$loc)))
+
+    expect_identical(points1[1:2,,drop=FALSE]$loc, points1$loc[1:2])
+    expect_identical(points1[c(1,1,2),,drop=FALSE]$loc, points1$loc[c(1,1,2)])
 })
 
 test_that("rbind() works for SpatialPointsDataFrame columns", {
@@ -34,6 +37,9 @@ test_that("rbind() works for SpatialPointsDataFrame columns", {
     expect_s4_class(out2$loc, "SpatialPointsDataFrame")
     expect_identical(coordinates(out2$loc), rbind(coordinates(out$loc), coordinates(pointsdf1$loc)))
     expect_identical(out2$loc$X, c(out$loc$X, pointsdf1$loc$X))
+
+    expect_identical(pointsdf1[1:2,,drop=FALSE]$loc, pointsdf1$loc[1:2,])
+    expect_identical(pointsdf1[c(1,1,2),,drop=FALSE]$loc, pointsdf1$loc[c(1,1,2),])
 })
 
 test_that("rbind() works for SpatialPolygons columns", {
@@ -48,6 +54,9 @@ test_that("rbind() works for SpatialPolygons columns", {
     expect_s4_class(out2$loc, "SpatialPolygons")
     expect_equivalent(coordinates(out2$loc), rbind(coordinates(out$loc), coordinates(polys1$loc)))
     expect_identical(0L, anyDuplicated(rownames(coordinates(out2$loc))))
+
+    expect_identical(polys1[1:2,,drop=FALSE]$loc, polys1$loc[1:2,])
+    expect_equivalent(coordinates(polys1[c(1,1,2),,drop=FALSE]$loc), coordinates(polys1$loc)[c(1,1,2),])
 })
 
 test_that("rbind() works for SpatialPolygonsDataFrame columns", {
@@ -62,4 +71,7 @@ test_that("rbind() works for SpatialPolygonsDataFrame columns", {
     expect_s4_class(out2$loc, "SpatialPolygonsDataFrame")
     expect_equivalent(coordinates(out2$loc), rbind(coordinates(out$loc), coordinates(polysdf1$loc)))
     expect_identical(out2$loc$X, c(out$loc$X, polysdf1$loc$X))
+
+    expect_identical(polysdf1[1:2,,drop=FALSE]$loc, polysdf1$loc[1:2,])
+    expect_equivalent(coordinates(polysdf1[c(1,1,2),,drop=FALSE]$loc), coordinates(polysdf1$loc)[c(1,1,2),])
 })
