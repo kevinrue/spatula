@@ -44,13 +44,11 @@
 #'
 #' showAsCell,SpatialPoints-method
 #' showAsCell,SpatialPolygons-method
-#'
-#' bindROWS,.PointsVector-method
-#' bindROWS,.PolygonsVector-method
 NULL
 
 #' @export
 #' @importFrom S4Vectors bindROWS
+#' @importFrom sp rbind.SpatialPoints rbind.SpatialPointsDataFrame
 setMethod("bindROWS", "SpatialPoints", function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE) {
     do.call(rbind, c(list(x), objects))
 })

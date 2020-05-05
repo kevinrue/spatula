@@ -18,7 +18,7 @@
 \alias{match,SpatialPolygons,SpatialPolygons-method}
 \alias{\%in\%,SpatialPolygons,SpatialPolygons-method}
 \alias{order,.PointsVector-method}
-\alias{order,.PolygonsVector-method}
+\alias{xtfrm,.PolygonsVector-method}
 \title{Comparisons for \pkg{sp} classes}
 \description{
 Implements comparison methods for \pkg{sp} classes including ordering and matching.

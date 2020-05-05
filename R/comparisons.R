@@ -107,7 +107,7 @@
 #' %in%,SpatialPolygons,SpatialPolygons-method
 #'
 #' order,.PointsVector-method
-#' order,.PolygonsVector-method
+#' xtfrm,.PolygonsVector-method
 NULL
 
 #####################

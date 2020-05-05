@@ -61,7 +61,7 @@ setMethod("sameAsPreviousROW", ".PolygonsVector", function(x) {
 })
 
 #' @importFrom sp coordinates
-#' @importFrom S4Vectors order
+#' @importFrom S4Vectors selfmatch
 setMethod("xtfrm", ".PolygonsVector", function(x) {
     ref <- .as_spatial(x)
     coords <- .mat2list(coordinates(ref))

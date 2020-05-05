@@ -4,13 +4,13 @@
 \name{spatula-bind}
 \alias{spatula-bind}
 \alias{bindROWS,SpatialPoints-method}
+\alias{extractROWS,SpatialPoints-method}
+\alias{extractROWS,SpatialPoints,ANY-method}
 \alias{bindROWS,SpatialPolygons-method}
 \alias{extractROWS,SpatialPolygons-method}
 \alias{extractROWS,SpatialPolygons,ANY-method}
 \alias{showAsCell,SpatialPoints-method}
 \alias{showAsCell,SpatialPolygons-method}
-\alias{bindROWS,.PointsVector-method}
-\alias{bindROWS,.PolygonsVector-method}
 \title{S4Vectors bindings for Spatial objects}
 \description{
 Implements various internal methods for \linkS4class{SpatialPoints} and \linkS4class{SpatialPolygons} objects,
