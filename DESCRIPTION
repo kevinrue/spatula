@@ -7,6 +7,7 @@ Description:
     allowing them to be stored as metadata fields on standard Bioconductor objects 
     like the SummarizedExperiment container.
 Depends: 
+    R (>= 4.0),
     sp,
     S4Vectors
 Imports:
